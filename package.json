@@ -1,19 +1,19 @@
 {
-  "name": "react-native-aliyun-oss",
-  "version": "0.0.1",
+  "name": "react-native-ali-oss",
+  "version": "0.0.2",
   "keywords": [
     "react-native",
-    "aliyun",
+    "ali",
     "oss"
   ],
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lotosbin/react-native-aliyun-oss.git"
+    "url": "git+https://github.com/s3111560/react-native-ali-oss.git"
   },
   "author": "lotosbin",
   "lichense": "MIT",
-  "homepage": "https://github.com/lotosbin/react-native-aliyun-oss#readme",
+  "homepage": "https://github.com/s3111560/react-native-ali-oss#readme",
   "dependencies": {
   }
 }
