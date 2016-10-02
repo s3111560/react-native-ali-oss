@@ -11,8 +11,7 @@
 #import <Foundation/Foundation.h>
 
 #import "OSSCancellationToken.h"
-
-NS_ASSUME_NONNULL_BEGIN
+#import "OSSDefines.h"
 
 /*!
  Error domain used if there was multiple errors on <OSSTask taskForCompletionOfAllTasks:>.
@@ -20,26 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSString *const OSSTaskErrorDomain;
 
 /*!
- An error code used for <OSSTask taskForCompletionOfAllTasks:>, if there were multiple errors.
- */
-extern NSInteger const kBFMultipleErrorsError;
-
-/*!
  An exception that is thrown if there was multiple exceptions on <OSSTask taskForCompletionOfAllTasks:>.
  */
 extern NSString *const OSSTaskMultipleExceptionsException;
-
-/*!
- An error userInfo key used if there were multiple errors on <OSSTask taskForCompletionOfAllTasks:>.
- Value type is `NSArray<NSError *> *`.
- */
-extern NSString *const OSSTaskMultipleErrorsUserInfoKey;
-
-/*!
- An error userInfo key used if there were multiple exceptions on <OSSTask taskForCompletionOfAllTasks:>.
- Value type is `NSArray<NSException *> *`.
- */
-extern NSString *const OSSTaskMultipleExceptionsUserInfoKey;
 
 @class OSSExecutor;
 @class OSSTask;
@@ -49,18 +31,18 @@ extern NSString *const OSSTaskMultipleExceptionsUserInfoKey;
  inspect the state of the task, and to add continuations to
  be run once the task is complete.
  */
-@interface OSSTask<__covariant ResultType> : NSObject
+@interface OSSTask OSS_GENERIC(__covariant OSSGenericType) : NSObject
 
 /*!
  A block that can act as a continuation for a task.
  */
-typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
+typedef id(^OSSContinuationBlock)(OSSTask OSS_GENERIC(OSSGenericType) *task);
 
 /*!
  Creates a task that is already completed with the given result.
  @param result The result for the task.
  */
-+ (instancetype)taskWithResult:(nullable ResultType)result;
++ (instancetype)taskWithResult:(OSSGenericType)result;
 
 /*!
  Creates a task that is already completed with the given error.
@@ -84,7 +66,7 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  all of the input tasks have completed.
  @param tasks An `NSArray` of the tasks to use as an input.
  */
-+ (instancetype)taskForCompletionOfAllTasks:(nullable NSArray<OSSTask *> *)tasks;
++ (instancetype)taskForCompletionOfAllTasks:(NSArray *)tasks;
 
 /*!
  Returns a task that will be completed once all of the input tasks have completed.
@@ -92,15 +74,7 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  an `NSArray` of all task results in the order they were provided.
  @param tasks An `NSArray` of the tasks to use as an input.
  */
-+ (instancetype)taskForCompletionOfAllTasksWithResults:(nullable NSArray<OSSTask *> *)tasks;
-
-/*!
- Returns a task that will be completed once there is at least one successful task.
- The first task to successuly complete will set the result, all other tasks results are 
- ignored.
- @param tasks An `NSArray` of the tasks to use as an input.
- */
-+ (instancetype)taskForCompletionOfAnyTask:(nullable NSArray<OSSTask *> *)tasks;
++ (instancetype)taskForCompletionOfAllTasksWithResults:(NSArray *)tasks;
 
 /*!
  Returns a task that will be completed a certain amount of time in the future.
@@ -115,7 +89,8 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  task will be finished (with result == nil).
  @param token The cancellation token (optional).
  */
-+ (instancetype)taskWithDelay:(int)millis cancellationToken:(nullable OSSCancellationToken *)token;
++ (instancetype)taskWithDelay:(int)millis
+            cancellationToken:(OSSCancellationToken *)token;
 
 /*!
  Returns a task that will be completed after the given block completes with
@@ -127,24 +102,25 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-+ (instancetype)taskFromExecutor:(OSSExecutor *)executor withBlock:(nullable id (^)())block;
++ (instancetype)taskFromExecutor:(OSSExecutor *)executor
+                       withBlock:(id (^)())block;
 
 // Properties that will be set on the task once it is completed.
 
 /*!
  The result of a successful task.
  */
-@property (nullable, nonatomic, strong, readonly) ResultType result;
+@property (nonatomic, strong, readonly) OSSGenericType result;
 
 /*!
  The error of a failed task.
  */
-@property (nullable, nonatomic, strong, readonly) NSError *error;
+@property (nonatomic, strong, readonly) NSError *error;
 
 /*!
  The exception of a failed task.
  */
-@property (nullable, nonatomic, strong, readonly) NSException *exception;
+@property (nonatomic, strong, readonly) NSException *exception;
 
 /*!
  Whether this task has been cancelled.
@@ -172,7 +148,7 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithBlock:(OSSContinuationBlock)block;
+- (instancetype)continueWithBlock:(OSSContinuationBlock)block;
 
 /*!
  Enqueues the given block to be run once this task is complete.
@@ -186,7 +162,8 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithBlock:(OSSContinuationBlock)block cancellationToken:(nullable OSSCancellationToken *)cancellationToken;
+- (instancetype)continueWithBlock:(OSSContinuationBlock)block
+                cancellationToken:(OSSCancellationToken *)cancellationToken;
 
 /*!
  Enqueues the given block to be run once this task is complete.
@@ -197,7 +174,8 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithExecutor:(OSSExecutor *)executor withBlock:(OSSContinuationBlock)block;
+- (instancetype)continueWithExecutor:(OSSExecutor *)executor
+                           withBlock:(OSSContinuationBlock)block;
 /*!
  Enqueues the given block to be run once this task is complete.
  @param executor A OSSExecutor responsible for determining how the
@@ -208,9 +186,9 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  his method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithExecutor:(OSSExecutor *)executor
-                           block:(OSSContinuationBlock)block
-               cancellationToken:(nullable OSSCancellationToken *)cancellationToken;
+- (instancetype)continueWithExecutor:(OSSExecutor *)executor
+                               block:(OSSContinuationBlock)block
+                   cancellationToken:(OSSCancellationToken *)cancellationToken;
 
 /*!
  Identical to continueWithBlock:, except that the block is only run
@@ -222,7 +200,7 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithSuccessBlock:(OSSContinuationBlock)block;
+- (instancetype)continueWithSuccessBlock:(OSSContinuationBlock)block;
 
 /*!
  Identical to continueWithBlock:, except that the block is only run
@@ -235,7 +213,8 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithSuccessBlock:(OSSContinuationBlock)block cancellationToken:(nullable OSSCancellationToken *)cancellationToken;
+- (instancetype)continueWithSuccessBlock:(OSSContinuationBlock)block
+                       cancellationToken:(OSSCancellationToken *)cancellationToken;
 
 /*!
  Identical to continueWithExecutor:withBlock:, except that the block
@@ -249,7 +228,8 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithExecutor:(OSSExecutor *)executor withSuccessBlock:(OSSContinuationBlock)block;
+- (instancetype)continueWithExecutor:(OSSExecutor *)executor
+                    withSuccessBlock:(OSSContinuationBlock)block;
 
 /*!
  Identical to continueWithExecutor:withBlock:, except that the block
@@ -264,9 +244,9 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
  If block returns a OSSTask, then the task returned from
  this method will not be completed until that task is completed.
  */
-- (OSSTask *)continueWithExecutor:(OSSExecutor *)executor
-                    successBlock:(OSSContinuationBlock)block
-               cancellationToken:(nullable OSSCancellationToken *)cancellationToken;
+- (instancetype)continueWithExecutor:(OSSExecutor *)executor
+                        successBlock:(OSSContinuationBlock)block
+                   cancellationToken:(OSSCancellationToken *)cancellationToken;
 
 /*!
  Waits until this operation is completed.
@@ -277,5 +257,3 @@ typedef __nullable id(^OSSContinuationBlock)(OSSTask<ResultType> *task);
 - (void)waitUntilFinished;
 
 @end
-
-NS_ASSUME_NONNULL_END

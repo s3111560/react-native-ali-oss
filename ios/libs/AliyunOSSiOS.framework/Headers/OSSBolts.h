@@ -8,19 +8,24 @@
  *
  */
 
+#import "OSSBoltsVersion.h"
 #import "OSSCancellationToken.h"
 #import "OSSCancellationTokenRegistration.h"
 #import "OSSCancellationTokenSource.h"
+#import "OSSDefines.h"
 #import "OSSExecutor.h"
 #import "OSSTask.h"
 #import "OSSTaskCompletionSource.h"
 
+/*! @abstract 80175001: There were multiple errors. */
+extern NSInteger const kOSSMultipleErrorsError;
 
-NS_ASSUME_NONNULL_BEGIN
+@interface OSSBolts : NSObject
 
-/**
- A string containing the version of the Bolts Framework used by the current application.
+/*!
+ Returns the version of the Bolts Framework as an NSString.
+ @returns The NSString representation of the current version.
  */
-extern NSString *const OSSBoltsFrameworkVersionString;
++ (NSString *)version;
 
-NS_ASSUME_NONNULL_END
+@end

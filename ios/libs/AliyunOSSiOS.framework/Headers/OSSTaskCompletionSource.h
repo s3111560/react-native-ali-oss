@@ -10,16 +10,16 @@
 
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
+#import "OSSDefines.h"
 
-@class OSSTask<ResultType>;
+@class OSSTask OSS_GENERIC(OSSGenericType);
 
 /*!
  A OSSTaskCompletionSource represents the producer side of tasks.
  It is a task that also has methods for changing the state of the
  task by settings its completion values.
  */
-@interface OSSTaskCompletionSource<__covariant ResultType> : NSObject
+@interface OSSTaskCompletionSource OSS_GENERIC(__covariant OSSGenericType) : NSObject
 
 /*!
  Creates a new unfinished task.
@@ -29,14 +29,14 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  The task associated with this TaskCompletionSource.
  */
-@property (nonatomic, strong, readonly) OSSTask<ResultType> *task;
+@property (nonatomic, strong, readonly) OSSTask OSS_GENERIC(OSSGenericType) *task;
 
 /*!
  Completes the task by setting the result.
  Attempting to set this for a completed task will raise an exception.
  @param result The result of the task.
  */
-- (void)setResult:(nullable ResultType)result;
+- (void)setResult:(OSSGenericType)result;
 
 /*!
  Completes the task by setting the error.
@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
  Sets the result of the task if it wasn't already completed.
  @returns whether the new value was set.
  */
-- (BOOL)trySetResult:(nullable ResultType)result;
+- (BOOL)trySetResult:(OSSGenericType)result;
 
 /*!
  Sets the error of the task if it wasn't already completed.
@@ -85,5 +85,3 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)trySetCancelled;
 
 @end
-
-NS_ASSUME_NONNULL_END

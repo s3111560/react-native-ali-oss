@@ -12,8 +12,6 @@
 
 #import "OSSCancellationTokenRegistration.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
 /*!
  A block that will be called when a token is cancelled.
  */
@@ -38,5 +36,3 @@ typedef void(^OSSCancellationBlock)();
 - (OSSCancellationTokenRegistration *)registerCancellationObserverWithBlock:(OSSCancellationBlock)block;
 
 @end
-
-NS_ASSUME_NONNULL_END

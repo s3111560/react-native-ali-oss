@@ -7,10 +7,55 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OSSBolts.h"
 
 @class OSSAllRequestNeededMessage;
 @class OSSFederationToken;
-@class OSSTask;
+
+extern NSString * const OSSListBucketResultXMLTOKEN;
+extern NSString * const OSSNameXMLTOKEN;
+extern NSString * const OSSDelimiterXMLTOKEN;
+extern NSString * const OSSMarkerXMLTOKEN;
+extern NSString * const OSSMaxKeysXMLTOKEN;
+extern NSString * const OSSIsTruncatedXMLTOKEN;
+extern NSString * const OSSContentsXMLTOKEN;
+extern NSString * const OSSKeyXMLTOKEN;
+extern NSString * const OSSLastModifiedXMLTOKEN;
+extern NSString * const OSSETagXMLTOKEN;
+extern NSString * const OSSTypeXMLTOKEN;
+extern NSString * const OSSSizeXMLTOKEN;
+extern NSString * const OSSStorageClassXMLTOKEN;
+extern NSString * const OSSCommonPrefixesXMLTOKEN;
+extern NSString * const OSSOwnerXMLTOKEN;
+extern NSString * const OSSIDXMLTOKEN;
+extern NSString * const OSSDisplayNameXMLTOKEN;
+extern NSString * const OSSBucketsXMLTOKEN;
+extern NSString * const OSSAccessControlListXMLTOKEN;
+extern NSString * const OSSGrantXMLTOKEN;
+extern NSString * const OSSBucketXMLTOKEN;
+extern NSString * const OSSCreationDate;
+extern NSString * const OSSPrefixXMLTOKEN;
+extern NSString * const OSSUploadIdXMLTOKEN;
+extern NSString * const OSSLocationXMLTOKEN;
+extern NSString * const OSSNextPartNumberMarkerXMLTOKEN;
+extern NSString * const OSSMaxPartsXMLTOKEN;
+extern NSString * const OSSPartXMLTOKEN;
+extern NSString * const OSSPartNumberXMLTOKEN;
+
+extern NSString * const OSSClientErrorDomain;
+extern NSString * const OSSServerErrorDomain;
+
+extern NSString * const OSSErrorMessageTOKEN;
+
+extern NSString * const OSSHttpHeaderContentDisposition;
+extern NSString * const OSSHttpHeaderXOSSCallback;
+extern NSString * const OSSHttpHeaderXOSSCallbackVar;
+extern NSString * const OSSHttpHeaderContentEncoding;
+extern NSString * const OSSHttpHeaderContentType;
+extern NSString * const OSSHttpHeaderContentMD5;
+extern NSString * const OSSHttpHeaderCacheControl;
+extern NSString * const OSSHttpHeaderExpires;
+
 
 typedef NS_ENUM(NSInteger, OSSOperationType) {
     OSSOperationTypeGetService,
@@ -21,7 +66,6 @@ typedef NS_ENUM(NSInteger, OSSOperationType) {
     OSSOperationTypeHeadObject,
     OSSOperationTypeGetObject,
     OSSOperationTypePutObject,
-    OSSOperationTypePutObjectACL,
     OSSOperationTypeAppendObject,
     OSSOperationTypeDeleteObject,
     OSSOperationTypeCopyObject,
@@ -58,7 +102,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  */
 @interface NSString (OSS)
 - (NSString *)oss_stringByAppendingPathComponentForURL:(NSString *)aString;
-- (NSString *)oss_trim;
 @end
 
 /**
@@ -114,7 +157,7 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  CredentialProvider协议，要求实现加签接口
  */
 @protocol OSSCredentialProvider <NSObject>
-@optional
+@required
 - (NSString *)sign:(NSString *)content error:(NSError **)error;
 @end
 
@@ -146,18 +189,9 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
 @property (nonatomic, copy) OSSFederationToken * (^federationTokenGetter)();
 
 - (instancetype)initWithFederationTokenGetter:(OSSGetFederationTokenBlock)federationTokenGetter;
+
 - (OSSFederationToken *)getToken:(NSError **)error;
-@end
-
-@interface OSSStsTokenCredentialProvider : NSObject <OSSCredentialProvider>
-@property (nonatomic, strong) NSString * accessKeyId;
-@property (nonatomic, strong) NSString * secretKeyId;
-@property (nonatomic, strong) NSString * securityToken;
-
-- (OSSFederationToken *)getToken;
-- (instancetype)initWithAccessKeyId:(NSString *)accessKeyId
-                        secretKeyId:(NSString *)secretKeyId
-                      securityToken:(NSString *)securityToken;
+- (uint64_t)currentTagNumber;
 @end
 
 /**
@@ -171,20 +205,10 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
 @property (nonatomic, assign) uint32_t maxRetryCount;
 
 /**
- 最大并发请求数
- */
-@property (nonatomic, assign) uint32_t maxConcurrentRequestCount;
-
-/**
  是否开启后台传输服务
  注意：只在上传文件时有效
  */
 @property (nonatomic, assign) BOOL enableBackgroundTransmitService;
-
-/**
- 是否使用Httpdns解析域名
- */
-@property (nonatomic, assign) BOOL isHttpdnsEnable;
 
 /**
  设置后台传输服务使用session的Id
@@ -478,12 +502,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
 @property (nonatomic, strong) NSString * delimiter;
 
 /**
- 如果因为max-keys的设定无法一次完成listing，返回结果会附加一个<NextMarker>，提示继续listing可以以此为marker。
- NextMarker中的值仍在list结果之中。
- */
-@property (nonatomic, strong) NSString * nextMarker;
-
-/**
  指明是否所有的结果都已经返回； “true”表示本次没有返回全部结果；“false”表示本次已经返回了全部结果。
  */
 @property (nonatomic, assign) BOOL isTruncated;
@@ -598,33 +616,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  下载文件时的HTTP响应头的KV字典
  */
 @property (nonatomic, strong) NSDictionary * objectMeta;
-@end
-
-/**
- 修改Object的访问权限请求头
- */
-@interface OSSPutObjectACLRequest : OSSRequest
-
-/**
- Bucket名称
- */
-@property (nonatomic, strong) NSString * bucketName;
-
-/**
- Object名称
- */
-@property (nonatomic, strong) NSString * objectKey;
-
-/**
- */
-@property (nonatomic, strong) NSString * acl;
-
-@end
-
-/**
- 修改Object的访问权限响应
- */
-@interface OSSPutObjectACLResult : OSSResult
 @end
 
 /**
@@ -1060,21 +1051,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  各个分块的信息
  */
 @property (nonatomic, strong) NSArray * partInfos;
-
-/**
- server回调参数设置
- */
-@property (nonatomic, strong) NSDictionary * callbackParam;
-
-/**
- server回调变量设置
- */
-@property (nonatomic, strong) NSDictionary * callbackVar;
-
-/**
- 完成分块上传附带的请求头
- */
-@property (nonatomic, strong) NSDictionary * completeMetaHeader;
 @end
 
 /**
@@ -1092,11 +1068,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  Complete Multipart Upload请求创建的Object，ETag值是其内容的UUID。ETag值可以用于检查Object内容是否发生变化。.
  */
 @property (nonatomic, strong) NSString * eTag;
-
-/**
- 如果设置了server回调，回调的响应内容
- */
-@property (nonatomic, strong) NSString * serverReturnJsonString;
 @end
 
 /**
@@ -1223,20 +1194,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  */
 @property (atomic, assign) BOOL isCancelled;
 
-/**
- server回调参数设置
- */
-@property (nonatomic, strong) NSDictionary * callbackParam;
-
-/**
- server回调变量设置
- */
-@property (nonatomic, strong) NSDictionary * callbackVar;
-
-/**
- 完成分块上传附带的请求头
- */
-@property (nonatomic, strong) NSDictionary * completeMetaHeader;
 - (void)cancel;
 @end
 
@@ -1244,10 +1201,6 @@ typedef OSSFederationToken * (^OSSGetFederationTokenBlock) ();
  断点续传的结果
  */
 @interface OSSResumableUploadResult : OSSResult
-/**
- 如果设置了server回调，回调的响应内容
- */
-@property (nonatomic, strong) NSString * serverReturnJsonString;
 @end
 
 #pragma mark 其他
